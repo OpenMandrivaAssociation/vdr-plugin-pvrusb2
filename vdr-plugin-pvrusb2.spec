@@ -2,7 +2,7 @@
 %define plugin	pvrusb2
 %define name	vdr-plugin-%plugin
 %define version	0.1.1
-%define rel	9
+%define rel	10
 
 Summary:	VDR plugin: PVR USB2 analog TV support
 Name:		%name
