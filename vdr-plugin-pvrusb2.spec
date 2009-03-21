@@ -14,6 +14,7 @@ URL:		http://vdr.unetz.com/download/pvrusb2/
 Source:		http://vdr.unetz.com/download/pvrusb2/vdr-%plugin-%version.tar.bz2
 Patch0:		pvrusb2-0.1.1-i18n-1.6.patch
 Patch1:		pvrusb2-0.1.1-vdr-1.6.patch
+Patch2:		pvrusb2-duplicate-parameter.patch
 BuildRoot:	%{_tmppath}/%{name}-buildroot
 BuildRequires:	vdr-devel >= 1.6.0
 Requires:	vdr-abi = %vdr_abi
@@ -27,6 +28,7 @@ kernel driver provided by Mike Isely
 %setup -q -n %plugin-%version
 %patch0 -p1
 %patch1 -p1
+%patch2 -p1
 %vdr_plugin_prep
 
 %vdr_plugin_params_begin %plugin
