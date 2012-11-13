@@ -1,0 +1,13 @@
+Index: pvrusb2-0.1.1/device.h
+===================================================================
+--- pvrusb2-0.1.1/device.h
++++ pvrusb2-0.1.1/device.h	2009-03-21 12:02:04.000000000 +0200
+@@ -107,7 +107,7 @@
+         static bool IsPvrUsb2Channel(const cChannel *_channel);
+         static cRMChannel* Vdr2PvrChannel(cChannel* _channel);
+         static cChannel* Pvr2VdrChannel(cRMChannel* _channel);
+-        static void Pvr2VdrChannel(cRMChannel* _channel, cChannel* _channel);
++        static void Pvr2VdrChannel(cRMChannel* _channel, cChannel* _vdrChannel);
+ 
+         virtual bool StartChannelScan(cRMScanChannelListener* _listener);
+         virtual bool StopChannelScan();

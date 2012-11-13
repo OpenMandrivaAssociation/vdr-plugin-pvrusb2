@@ -1,0 +1,1132 @@
+
+This is a semi-automatically created i18n adaptation patch and may contain
+errors (such as missing translations). This should only be used as a
+temporary measure until the upstream plugin maintainer fixes the plugin
+properly according to the instructions in i18n-to-gettext.pl.
+
+Created for Mandriva Linux packaging by Anssi Hannula <anssi@mandriva.org>.
+
+
+Index: pvrusb2-0.1.1/Makefile
+===================================================================
+--- pvrusb2-0.1.1/Makefile
++++ pvrusb2-0.1.1/Makefile	2008-04-24 22:59:21.000000000 +0300
+@@ -50,7 +50,7 @@
+         channel.o \
+         channelmenu.o \
+         device.o \
+-        i18n.o \
++         \
+         menuitems.o \
+         pvrusb2device.o \
+         reader.o \
+@@ -74,9 +74,34 @@
+ 
+ -include $(DEPFILE)
+ 
++### Internationalization (I18N):
++
++PODIR     = po
++LOCALEDIR = $(VDRDIR)/locale
++I18Npo    = $(wildcard $(PODIR)/*.po)
++I18Nmsgs  = $(addprefix $(LOCALEDIR)/, $(addsuffix /LC_MESSAGES/vdr-$(PLUGIN).mo, $(notdir $(foreach file, $(I18Npo), $(basename $(file))))))
++I18Npot   = $(PODIR)/$(PLUGIN).pot
++
++%.mo: %.po
++	msgfmt -c -o $@ $<
++
++$(I18Npot): $(wildcard *.[ch] *.[ch]xx *.cc *.[ch]pp *.hh)
++	xgettext -C -cTRANSLATORS --no-wrap --no-location -k -ktr -ktrNOOP --msgid-bugs-address='<http://qa.mandriva.com/>' -o $@ $^
++
++%.po: $(I18Npot)
++	msgmerge -U --no-wrap --no-location --backup=none -q $@ $<
++	@touch $@
++
++$(I18Nmsgs): $(LOCALEDIR)/%/LC_MESSAGES/vdr-$(PLUGIN).mo: $(PODIR)/%.mo
++	@mkdir -p $(dir $@)
++	cp $< $@
++
++.PHONY: i18n
++i18n: $(I18Nmsgs)
++
+ ### Targets:
+ 
+-all: libvdr-$(PLUGIN).so
++all: libvdr-$(PLUGIN).so i18n
+ 
+ libvdr-$(PLUGIN).so: $(OBJS)
+ 	$(CXX) $(CXXFLAGS) -shared $(OBJS) -o $@
+@@ -91,4 +116,5 @@
+ 	@echo Distribution package created as $(PACKAGE).tgz
+ 
+ clean:
++	@-rm -f $(PODIR)/*.mo $(PODIR)/*.pot
+ 	@-rm -f $(OBJS) $(DEPFILE) *.so *.tgz core* *~
+Index: pvrusb2-0.1.1/common.h
+===================================================================
+--- pvrusb2-0.1.1/common.h
++++ pvrusb2-0.1.1/common.h	2008-04-24 22:59:21.000000000 +0300
+@@ -70,7 +70,7 @@
+ #include "channelmenu.h"
+ #include "device.h"
+ #include "devicelist.h"
+-#include "i18n.h"
++
+ #include "menuitems.h"
+ #include "pvrusb2device.h"
+ #include "reader.h"
+Index: pvrusb2-0.1.1/i18n.c
+===================================================================
+--- pvrusb2-0.1.1/i18n.c
++++ pvrusb2-0.1.1/i18n.c	2008-04-24 22:59:21.000000000 +0300
+@@ -1,624 +0,0 @@
+-/*
+- * See the files COPYING and README for copyright information and how to reach 
+- * the author.
+- *
+- */
+-
+-#include "common.h"
+-
+-const tI18nPhrase pvrusb2Phrases[] = {
+-    {
+-        "PVR USB2 Analog TV Driver Plugin",
+-        "PVR USB2 Analog TV Treiber Plugin",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Frequency",
+-        "Frequenz",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Start frequency",
+-        "Start-Frequenz",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "End frequency",
+-        "End-Frequenz",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Resolution",
+-        "Auflösung",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Volume",
+-        "Lautstärke",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Brightness",
+-        "Helligkeit",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Contrast",
+-        "Kontrast",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Hue",
+-        "Farbton",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Saturation",
+-        "Sättigung",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Average video bitrate",
+-        "Durchschnittliche Video Bitrate",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Peak video bitrate",
+-        "Maximale Video Bitrate",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Enable VBR mode",
+-        "VBR Mode aktivieren",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Audio bitrate",
+-        "Audio Bitrate",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Channels",
+-        "Kanäle",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Channel name",
+-        "Sendername",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Scan",
+-        "Suche",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Stop",
+-        "Stop",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Tune",
+-        "Abstimmen",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Fine Tune",
+-        "Feinabstimmung",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Video device 1",
+-        "Video Gerät 1",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Video device 2",
+-        "Video Gerät 2",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Video device 3",
+-        "Video Gerät 3",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Video device 4",
+-        "Video Gerät 4",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Video standard",
+-        "Video Standard",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Remove",
+-        "Löschen",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Add",
+-        "Hinzufügen",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Update",
+-        "Aktualisieren",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Channel updated",
+-        "Kanal aktualisiert",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Delete channel?",
+-        "Kanal löschen?",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "VDR channel number",
+-        "VDR Kanal Nummer",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Analog TV channels",
+-        "Analog TV Kanäle",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "Other TV channels",
+-        "Andere TV Kanäle",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    {
+-        "PVR USB2 Tuning",
+-        "PVR USB2 Tuning",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-        "",
+-    },
+-    { NULL }
+-};
+-
+Index: pvrusb2-0.1.1/i18n.h
+===================================================================
+--- pvrusb2-0.1.1/i18n.h
++++ pvrusb2-0.1.1/i18n.h	2008-04-24 22:59:21.000000000 +0300
+@@ -1,15 +0,0 @@
+-/*
+- * See the README file for copyright information and how to reach the author.
+- *
+- */
+-
+-#ifndef __PVRUSB2_I18N_H
+-#define __PVRUSB2_I18N_H
+-
+-#include "common.h"
+-
+-extern const tI18nPhrase pvrusb2Phrases[];
+-
+-#endif // __PVRUSB2_I18N_H
+-
+-
+Index: pvrusb2-0.1.1/pvrusb2.c
+===================================================================
+--- pvrusb2-0.1.1/pvrusb2.c
++++ pvrusb2-0.1.1/pvrusb2.c	2008-04-24 22:59:21.000000000 +0300
+@@ -91,7 +91,7 @@
+ {
+     // Start any background activities the plugin shall perform.
+     LogInfo("Start");
+-    RegisterI18n(pvrusb2Phrases);
++    
+     return true;
+ }
+ 
+Index: pvrusb2-0.1.1/pvrusb2.h
+===================================================================
+--- pvrusb2-0.1.1/pvrusb2.h
++++ pvrusb2-0.1.1/pvrusb2.h	2008-04-24 22:59:21.000000000 +0300
+@@ -12,7 +12,7 @@
+ #include "common.h"
+ 
+ static const char* VERSION        = "0.1.1";
+-static const char* DESCRIPTION    = "PVR USB2 Analog TV Driver Plugin";
++static const char* DESCRIPTION    = trNOOP("PVR USB2 Analog TV Driver Plugin");
+ //static const char* MAINMENUENTRY  = "PVR USB2";
+ 
+ class cPvrUsb2Plugin:
+Index: pvrusb2-0.1.1/setup.c
+===================================================================
+--- pvrusb2-0.1.1/setup.c
++++ pvrusb2-0.1.1/setup.c	2008-04-24 22:59:21.000000000 +0300
+@@ -37,13 +37,13 @@
+ 
+ static const cRMSetupItem setupItemList[]=
+ {
+-    { eSetupResolution, "Resolution", eVideoResolutionItem, "720x576" },
+-    { eSetupVolume, "Volume", ePercentItem, "100" },
++    { eSetupResolution, trNOOP("Resolution"), eVideoResolutionItem, "720x576" },
++    { eSetupVolume, trNOOP("Volume"), ePercentItem, "100" },
+     { eSetupAudioBitrate, "AudioBitrate", eAudioBitrateItem, "224" },
+-    { eSetupBrightness, "Brightness", eSliderItem },
+-    { eSetupContrast, "Contrast", eSliderItem },
+-    { eSetupHue, "Hue", eOffsetItem },
+-    { eSetupSaturation, "Saturation", eSliderItem },
++    { eSetupBrightness, trNOOP("Brightness"), eSliderItem },
++    { eSetupContrast, trNOOP("Contrast"), eSliderItem },
++    { eSetupHue, trNOOP("Hue"), eOffsetItem },
++    { eSetupSaturation, trNOOP("Saturation"), eSliderItem },
+     { eSetupVideoBitrateAverage, "VideoBitrateAverage",
+             eVideoBitrateItem, "3.6" },
+     { eSetupVideoBitratePeak, "VideoBitratePeak", eVideoBitrateItem, "10.0" },
+Index: pvrusb2-0.1.1/setupmenu.c
+===================================================================
+--- pvrusb2-0.1.1/setupmenu.c
++++ pvrusb2-0.1.1/setupmenu.c	2008-04-24 22:59:21.000000000 +0300
+@@ -14,21 +14,21 @@
+ 
+ static const cMenuItem menuItems[]=
+ {
+-    { eSetupResolution, "Resolution" },
+-    { eSetupVolume, "Volume" },
+-    { eSetupAudioBitrate, "Audio bitrate" },
+-    { eSetupBrightness, "Brightness" },
+-    { eSetupContrast, "Contrast" },
+-    { eSetupHue, "Hue" },
+-    { eSetupSaturation, "Saturation" },
+-    { eSetupVideoBitrateAverage, "Average video bitrate" },
+-    { eSetupVideoBitratePeak, "Peak video bitrate" },
+-    { eSetupVbr, "Enable VBR mode" },
+-    { eSetupVideoDevice0, "Video device 1" },
+-    { eSetupVideoDevice1, "Video device 2" },
+-    { eSetupVideoDevice2, "Video device 3" },
+-    { eSetupVideoDevice3, "Video device 4" },
+-    { eSetupVideoStandard, "Video standard" },
++    { eSetupResolution, trNOOP("Resolution") },
++    { eSetupVolume, trNOOP("Volume") },
++    { eSetupAudioBitrate, trNOOP("Audio bitrate") },
++    { eSetupBrightness, trNOOP("Brightness") },
++    { eSetupContrast, trNOOP("Contrast") },
++    { eSetupHue, trNOOP("Hue") },
++    { eSetupSaturation, trNOOP("Saturation") },
++    { eSetupVideoBitrateAverage, trNOOP("Average video bitrate") },
++    { eSetupVideoBitratePeak, trNOOP("Peak video bitrate") },
++    { eSetupVbr, trNOOP("Enable VBR mode") },
++    { eSetupVideoDevice0, trNOOP("Video device 1") },
++    { eSetupVideoDevice1, trNOOP("Video device 2") },
++    { eSetupVideoDevice2, trNOOP("Video device 3") },
++    { eSetupVideoDevice3, trNOOP("Video device 4") },
++    { eSetupVideoStandard, trNOOP("Video standard") },
+ };
+ 
+ cRMSetupMenu::cRMSetupMenu()
+Index: pvrusb2-0.1.1/po/de_DE.po
+===================================================================
+--- pvrusb2-0.1.1/po/de_DE.po
++++ pvrusb2-0.1.1/po/de_DE.po	2008-04-24 22:59:21.000000000 +0300
+@@ -0,0 +1,152 @@
++# VDR pvrusb2 plugin language source file.
++# Copyright (C) YEAR THE VDR-pvrusb2'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the VDR-pvrusb2 package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++msgid ""
++msgstr ""
++"Project-Id-Version: VDR-pvrusb2\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-24 22:59+0300\n"
++"PO-Revision-Date: 2008-04-24 22:59+0300\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: <vdr@linuxtv.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=ISO-8859-15\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: channel.c:125 channel.c:133
++msgid "Analog TV channels"
++msgstr "Analog TV Kanäle"
++
++#: channel.c:137
++msgid "Other TV channels"
++msgstr "Andere TV Kanäle"
++
++#: channelmenu.c:28 setupmenu.c:139
++msgid "Channels"
++msgstr "Kanäle"
++
++#: channelmenu.c:42 channelmenu.c:52
++msgid "PVR USB2 Tuning"
++msgstr "PVR USB2 Tuning"
++
++#: channelmenu.c:122
++msgid "Scan"
++msgstr "Suche"
++
++#: channelmenu.c:124
++msgid "Stop"
++msgstr "Stop"
++
++#: channelmenu.c:128
++msgid "Remove"
++msgstr "Löschen"
++
++#: channelmenu.c:132
++msgid "Tune"
++msgstr "Abstimmen"
++
++#: channelmenu.c:138
++msgid "Update"
++msgstr "Aktualisieren"
++
++#: channelmenu.c:140
++msgid "Add"
++msgstr "Hinzufügen"
++
++#: channelmenu.c:162 tunemenu.c:35
++msgid "Frequency"
++msgstr "Frequenz"
++
++#: channelmenu.c:279 tunemenu.c:81
++msgid "Channel updated"
++msgstr "Kanal aktualisiert"
++
++#: channelmenu.c:286
++msgid "Delete channel?"
++msgstr "Kanal löschen?"
++
++#: pvrusb2.h:15
++msgid "PVR USB2 Analog TV Driver Plugin"
++msgstr "PVR USB2 Analog TV Treiber Plugin"
++
++#: setup.c:40 setupmenu.c:17
++msgid "Resolution"
++msgstr "Auflösung"
++
++#: setup.c:41 setupmenu.c:18
++msgid "Volume"
++msgstr "Lautstärke"
++
++#: setup.c:43 setupmenu.c:20
++msgid "Brightness"
++msgstr "Helligkeit"
++
++#: setup.c:44 setupmenu.c:21
++msgid "Contrast"
++msgstr "Kontrast"
++
++#: setup.c:45 setupmenu.c:22
++msgid "Hue"
++msgstr "Farbton"
++
++#: setup.c:46 setupmenu.c:23
++msgid "Saturation"
++msgstr "Sättigung"
++
++#: setupmenu.c:19
++msgid "Audio bitrate"
++msgstr "Audio Bitrate"
++
++#: setupmenu.c:24
++msgid "Average video bitrate"
++msgstr "Durchschnittliche Video Bitrate"
++
++#: setupmenu.c:25
++msgid "Peak video bitrate"
++msgstr "Maximale Video Bitrate"
++
++#: setupmenu.c:26
++msgid "Enable VBR mode"
++msgstr "VBR Mode aktivieren"
++
++#: setupmenu.c:27
++msgid "Video device 1"
++msgstr "Video Gerät 1"
++
++#: setupmenu.c:28
++msgid "Video device 2"
++msgstr "Video Gerät 2"
++
++#: setupmenu.c:29
++msgid "Video device 3"
++msgstr "Video Gerät 3"
++
++#: setupmenu.c:30
++msgid "Video device 4"
++msgstr "Video Gerät 4"
++
++#: setupmenu.c:31
++msgid "Video standard"
++msgstr "Video Standard"
++
++#: tunemenu.c:9
++msgid "Fine Tune"
++msgstr "Feinabstimmung"
++
++#: tunemenu.c:32
++msgid "Channel name"
++msgstr "Sendername"
++
++#: tunemenu.c:37
++msgid "Start frequency"
++msgstr "Start-Frequenz"
++
++#: tunemenu.c:41
++msgid "End frequency"
++msgstr "End-Frequenz"
++
++#: tunemenu.c:45
++msgid "VDR channel number"
++msgstr "VDR Kanal Nummer"
+Index: pvrusb2-0.1.1/po/pvrusb2.pot
+===================================================================
+--- pvrusb2-0.1.1/po/pvrusb2.pot
++++ pvrusb2-0.1.1/po/pvrusb2.pot	2008-04-24 22:59:21.000000000 +0300
+@@ -0,0 +1,153 @@
++# SOME DESCRIPTIVE TITLE.
++# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
++# This file is distributed under the same license as the PACKAGE package.
++# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
++#
++#, fuzzy
++msgid ""
++msgstr ""
++"Project-Id-Version: PACKAGE VERSION\n"
++"Report-Msgid-Bugs-To: http://qa.mandriva.com/\n"
++"POT-Creation-Date: 2008-04-24 22:59+0300\n"
++"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
++"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
++"Language-Team: LANGUAGE <LL@li.org>\n"
++"MIME-Version: 1.0\n"
++"Content-Type: text/plain; charset=CHARSET\n"
++"Content-Transfer-Encoding: 8bit\n"
++
++#: channel.c:125 channel.c:133
++msgid "Analog TV channels"
++msgstr ""
++
++#: channel.c:137
++msgid "Other TV channels"
++msgstr ""
++
++#: channelmenu.c:28 setupmenu.c:139
++msgid "Channels"
++msgstr ""
++
++#: channelmenu.c:42 channelmenu.c:52
++msgid "PVR USB2 Tuning"
++msgstr ""
++
++#: channelmenu.c:122
++msgid "Scan"
++msgstr ""
++
++#: channelmenu.c:124
++msgid "Stop"
++msgstr ""
++
++#: channelmenu.c:128
++msgid "Remove"
++msgstr ""
++
++#: channelmenu.c:132
++msgid "Tune"
++msgstr ""
++
++#: channelmenu.c:138
++msgid "Update"
++msgstr ""
++
++#: channelmenu.c:140
++msgid "Add"
++msgstr ""
++
++#: channelmenu.c:162 tunemenu.c:35
++msgid "Frequency"
++msgstr ""
++
++#: channelmenu.c:279 tunemenu.c:81
++msgid "Channel updated"
++msgstr ""
++
++#: channelmenu.c:286
++msgid "Delete channel?"
++msgstr ""
++
++#: pvrusb2.h:15
++msgid "PVR USB2 Analog TV Driver Plugin"
++msgstr ""
++
++#: setup.c:40 setupmenu.c:17
++msgid "Resolution"
++msgstr ""
++
++#: setup.c:41 setupmenu.c:18
++msgid "Volume"
++msgstr ""
++
++#: setup.c:43 setupmenu.c:20
++msgid "Brightness"
++msgstr ""
++
++#: setup.c:44 setupmenu.c:21
++msgid "Contrast"
++msgstr ""
++
++#: setup.c:45 setupmenu.c:22
++msgid "Hue"
++msgstr ""
++
++#: setup.c:46 setupmenu.c:23
++msgid "Saturation"
++msgstr ""
++
++#: setupmenu.c:19
++msgid "Audio bitrate"
++msgstr ""
++
++#: setupmenu.c:24
++msgid "Average video bitrate"
++msgstr ""
++
++#: setupmenu.c:25
++msgid "Peak video bitrate"
++msgstr ""
++
++#: setupmenu.c:26
++msgid "Enable VBR mode"
++msgstr ""
++
++#: setupmenu.c:27
++msgid "Video device 1"
++msgstr ""
++
++#: setupmenu.c:28
++msgid "Video device 2"
++msgstr ""
++
++#: setupmenu.c:29
++msgid "Video device 3"
++msgstr ""
++
++#: setupmenu.c:30
++msgid "Video device 4"
++msgstr ""
++
++#: setupmenu.c:31
++msgid "Video standard"
++msgstr ""
++
++#: tunemenu.c:9
++msgid "Fine Tune"
++msgstr ""
++
++#: tunemenu.c:32
++msgid "Channel name"
++msgstr ""
++
++#: tunemenu.c:37
++msgid "Start frequency"
++msgstr ""
++
++#: tunemenu.c:41
++msgid "End frequency"
++msgstr ""
++
++#: tunemenu.c:45
++msgid "VDR channel number"
++msgstr ""

@@ -1,0 +1,30 @@
+Index: pvrusb2-0.1.1/device.c
+===================================================================
+--- pvrusb2-0.1.1/device.c
++++ pvrusb2-0.1.1/device.c	2008-04-24 23:06:03.000000000 +0300
+@@ -510,9 +510,11 @@
+     retVal->SetCaIds(cas);
+     int aPids[]={ kAudioPid, 0 };
+     int dPids[]={ 0 };
++    int sPids[]={ 0 };
+     char aLangs[][MAXLANGCODE2]={ "" };
+     char dLangs[][MAXLANGCODE2]={ "" };
+-    retVal->SetPids(kVideoPid, 0, aPids, aLangs, dPids, dLangs, 0);
++    char sLangs[][MAXLANGCODE2]={ "" };
++    retVal->SetPids(kVideoPid, 0, aPids, aLangs, dPids, dLangs, sPids, sLangs, 0);
+     retVal->SetName(_channel->Name(), "", "");
+     return retVal;
+ }
+@@ -525,9 +527,11 @@
+     _vdrChannel->SetCaIds(cas);
+     int aPids[]={ kAudioPid, 0 };
+     int dPids[]={0};
++    int sPids[]={0};
+     char aLangs[][MAXLANGCODE2]={ "" };
+     char dLangs[][MAXLANGCODE2]={ "" };
+-    _vdrChannel->SetPids(kVideoPid, 0, aPids, aLangs, dPids, dLangs, 0);
++    char sLangs[][MAXLANGCODE2]={ "" };
++    _vdrChannel->SetPids(kVideoPid, 0, aPids, aLangs, dPids, dLangs, sPids, sLangs, 0);
+     _vdrChannel->SetName(_channel->Name(), "", "");
+ }
+ 
