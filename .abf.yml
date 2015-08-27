@@ -1,2 +1,4 @@
+removed_sources:
+  vdr-pvrusb2-0.1.1.tar.bz2: 3d33812094f2211e90e2fa69e65d98ac874590f8
 sources:
-  "vdr-pvrusb2-0.1.1.tar.bz2": 3d33812094f2211e90e2fa69e65d98ac874590f8
+  vdr-pvrusb2-0.1.1.tgz: a961800a90ca6be970b33ee192f2bf624d4c091e
