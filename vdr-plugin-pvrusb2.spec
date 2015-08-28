@@ -3,7 +3,7 @@
 Summary:	VDR plugin: PVR USB2 analog TV support
 Name:		vdr-plugin-%plugin
 Version:	0.1.1
-Release:	19
+Release:	20
 Group:		Video
 License:	GPL+
 URL:		http://vdr.unetz.com/download/pvrusb2/
