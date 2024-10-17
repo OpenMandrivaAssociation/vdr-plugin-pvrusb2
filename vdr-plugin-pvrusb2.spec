@@ -6,7 +6,7 @@ Version:	0.1.1
 Release:	20
 Group:		Video
 License:	GPL+
-URL:		http://vdr.unetz.com/download/pvrusb2/
+URL:		https://vdr.unetz.com/download/pvrusb2/
 Source:		http://vdr.unetz.com/download/pvrusb2/vdr-%plugin-%{version}.tgz
 Patch0:		pvrusb2-0.1.1-i18n-1.6.patch
 Patch1:		pvrusb2-0.1.1-vdr-1.6.patch
